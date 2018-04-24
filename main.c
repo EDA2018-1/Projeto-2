@@ -6,8 +6,9 @@
 int recebePosicaoTreinamento(int *, int);
 int *arqAleat(int *);
 int *tamanhoImagem(FILE *, int *);
-int **alocaMatriz(int *, FILE*fp);
+int **alocaMatriz(int *);
 int **gravarMatriz(int *, int **, FILE*fp);
+
 /*
   FUNCAO DE RANDOM, O Q FOR 1 SERA OS ESCOLHIDOS DE valores DA PASTA, TANTO ASFALTO QUANTO GRAMA,
   LOGO O QUE SOBRA É TESTE
@@ -28,42 +29,42 @@ int main (int argc, char *argv[]){
   sortyAsphalt = arqAleat(sortyAsphalt);
   sortyGrass = arqAleat(sortyGrass);
 
-
-  posicaoAsphalt = recebePosicaoTreinamento(sortyAsphalt, contImagem);
   contImagem++;
+  posicaoAsphalt = recebePosicaoTreinamento(sortyAsphalt, contImagem);
   if(posicaoAsphalt<10)
     n = sprintf(diretorioAsphalt, "DataSet/asphalt/asphalt_0%d.txt", posicaoAsphalt);
   else
     n = sprintf(diretorioAsphalt, "DataSet/asphalt/asphalt_%d.txt", posicaoAsphalt);
   fp= fopen(diretorioAsphalt, "r");
-
   dimensoesImagem = tamanhoImagem(fp, dimensoesImagem); //dimensoesImagem[0] -> linha dimensoesImagem[1] ->coluna
-  mat = alocaMatriz(dimensoesImagem, fp);
-//  mat = gravarMatriz(dimensoesImagem, mat, fp);
-
+  fp= fopen(diretorioAsphalt, "r");
+  mat = alocaMatriz(dimensoesImagem);
+  mat = gravarMatriz(dimensoesImagem, mat, fp);
+  fclose(fp);
   return 0;
 }
 
-/*int **gravarMatriz(int *dimensoes, int **matriz, FILE*fp){
+int **gravarMatriz(int *dimensoes, int **matriz, FILE*fp){
   int cont, contaux;
-  int numero;
-  for(cont=0;cont<dimensoes[0];cont++){
+  char exc;
+  for (cont=0;cont<dimensoes[0];cont++){
     for(contaux=0;contaux<dimensoes[1];contaux++){
-      fscanf(fp, "%d\n ", &matriz[cont][contaux]);
-      printf("%d\n", matriz[cont][contaux]);
+      if(fscanf(fp, "%c", &exc) != ';'){
+        fscanf(fp, "%d", &matriz[cont][contaux]);
+      }
     }
   }
   return matriz;
-}*/
-int **alocaMatriz(int *dimensoes, FILE*fp){
+}
+int **alocaMatriz(int *dimensoes){
   int cont, contaux;
   int **matriz;
-  matriz = (int **) calloc(dimensoes[0], sizeof(int *));
+  matriz = (int **) malloc(dimensoes[0]* sizeof(int *));
   if (matriz == NULL){
     printf("MEMORIA INSUFICIENTE\n");
   }
   for ( cont = 0; cont < dimensoes[0]; cont++ ) {
-    matriz[cont] = (int*) calloc(dimensoes[1], sizeof(int));
+    matriz[cont] = (int*) malloc(dimensoes[1] * sizeof(int));
     if (matriz[cont] == NULL) {
       printf ("MEMORIA INSUFICIENTE");
     }
@@ -73,7 +74,7 @@ int **alocaMatriz(int *dimensoes, FILE*fp){
 
 int *tamanhoImagem(FILE*fp, int *dimensoesImagem){
   char str;
-  dimensoesImagem[1] +=1; //devido ao ultimo ponto e virgula de cada linha que nao possui
+  dimensoesImagem[1] += 1; //devido ao ultimo ponto e virgula de cada linha que nao possui
   do{
     str =getc(fp);
     if(str == ';' &&dimensoesImagem[0]==0 ){
